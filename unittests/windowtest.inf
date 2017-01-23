@@ -16,6 +16,7 @@ Array gg_tokenbuf -> DICT_WORD_SIZE;
 Constant MAX_BUFFER_WORDS = 20;
 Constant PARSE_BUFFER_LEN = 244;    ! 4 + MAX_BUFFER_WORDS*4;
 Array parse_buffer --> PARSE_BUFFER_LEN/WORDSIZE;
+Array window_prefix string "window_";
 
 Global num_understood;
 Global dir_understood;
@@ -26,6 +27,7 @@ Global size_understood;
 Global win_understood;
 Global filemode_understood;
 Global operand_understood;
+Global winref_understood;
 
 Global testglobal;
 
@@ -380,6 +382,30 @@ Constant ALTWIN_ROCK 101;
     return true;
 ];
 
+[ iswindowref wx  wlen wpos ix val ch;
+    print window_prefix->0;
+    wlen = parse_buffer-->(wx*3+2);
+    if (window_prefix->0 > wlen)
+        return false;
+    wpos = parse_buffer-->(wx*3+3);
+    val = 0;
+    for (ix=0 : ix< window_prefix->0 : ix++) {
+        ch = input_buffer->(wpos+ix);
+        print ch, "^";
+        print window_prefix->(ix + 1), "^";
+        if (ch ~= window_prefix->(ix + 1))
+            return false;
+    }
+    for (ix=window_prefix->0 : ix<wlen : ix++) {
+        ch = input_buffer->(wpos+ix);
+        if (ch < '0' || ch > '9')
+            return false;
+        val = val * 10 + (ch - '0');
+    }
+    winref_understood = val;
+    return true;
+];
+
 [ parse_number  numwords wx;
   num_understood = 0;
   numwords = parse_buffer-->0;
@@ -420,13 +446,14 @@ Constant ALTWIN_ROCK 101;
   }
 ];
 
-[ parse_window_params  numwords wx wd;
+[ parse_window_params  numwords wx wd win_set;
   dir_understood = 2;
   split_understood = $10;
   type_understood = 4;
   size_understood = 1;
   win_understood = mainwin;
   border_understood = $0;
+  win_set = 0;
   
   numwords = parse_buffer-->0;
   for (wx=1 : wx<numwords : wx++) {
@@ -449,12 +476,17 @@ Constant ALTWIN_ROCK 101;
       'graphic', 'graphics': type_understood = 5;
       'pair': type_understood = 1;
 
-      'main': win_understood = mainwin;
-      'alt', 'second', 'other': win_understood = altwin;
+      'main': win_understood = mainwin; win_set = 1;
+      'alt', 'second', 'other': win_understood = altwin; win_set = 1;
 
       default:
         if (isnumber(wx))
           size_understood = num_understood;
+        else if (win_set == 0 && iswindowref(wx)) {
+          print "window found: ", winref_understood, "^";
+          win_understood = winref_understood;
+        }
+          
     }
   }
 ];
