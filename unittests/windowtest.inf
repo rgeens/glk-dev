@@ -17,6 +17,7 @@ Constant MAX_BUFFER_WORDS = 20;
 Constant PARSE_BUFFER_LEN = 244;    ! 4 + MAX_BUFFER_WORDS*4;
 Array parse_buffer --> PARSE_BUFFER_LEN/WORDSIZE;
 Array window_prefix string "window_";
+Array keywindow_prefix string "keywindow_";
 
 Global num_understood;
 Global dir_understood;
@@ -24,10 +25,11 @@ Global split_understood;
 Global border_understood;
 Global type_understood;
 Global size_understood;
+Global winref_understood;
 Global win_understood;
+Global keywin_understood;
 Global filemode_understood;
 Global operand_understood;
-Global winref_understood;
 
 Global testglobal;
 
@@ -100,12 +102,8 @@ Constant ALTWIN_ROCK 101;
       show_windows();
 
     'open', 'split':
-      if (altwin) {
-        print "The window is already split.^";
-        continue;
-      }
-      parse_window_params();
-      altwin = glk($0023, mainwin, dir_understood+split_understood+border_understood, size_understood, type_understood, ALTWIN_ROCK); ! glk_window_open
+      parse_window_params(mainwin);
+      altwin = glk($0023, win_understood, dir_understood+split_understood+border_understood, size_understood, type_understood, ALTWIN_ROCK); ! glk_window_open
       if (~~altwin) {
         print "Failed.^";
         continue;
@@ -121,7 +119,8 @@ Constant ALTWIN_ROCK 101;
         print "The window is not split.^";
         continue;
       }
-      glk($00D1, altwin, gg_event); ! cancel_line_event
+      parse_window_params(altwin);
+      glk($00D1, win_understood, gg_event); ! cancel_line_event
       if (gg_event-->0 == 3) {
         print "Window had line input pending";
         print " (", gg_event-->2, " chars)";
@@ -133,9 +132,11 @@ Constant ALTWIN_ROCK 101;
         }
         print ".^";
       }
-      glk($0024, altwin, gg_event); ! window_close
-      altwin = 0;
-      altwininput = false;
+      glk($0024, win_understood, gg_event); ! window_close
+      if (altwin == win_understood)  {
+        altwin = 0;
+        altwininput = false;
+      }
       print "Window closed; it had printed ", gg_event-->1,
         " characters and read in ", gg_event-->0, ".^";
 
@@ -144,12 +145,12 @@ Constant ALTWIN_ROCK 101;
         print "The window is not split.^";
         continue;
       }
-      win = glk($0029, altwin); ! window_get_parent
+      parse_window_params(altwin);
+      win = glk($0029, win_understood); ! window_get_parent
       if (~~win) {
         print "Unable to locate parent of secondary window.^";
         continue;
       }
-      parse_window_params();
       glk($0027, win, gg_event+0, gg_event+4, gg_event+8); ! window_get_arrangement
       olddir = (gg_event-->0) & $0F;
       if ((olddir == 0 or 1) && (dir_understood == 2 or 3)) {
@@ -160,7 +161,7 @@ Constant ALTWIN_ROCK 101;
         print "Cannot change split axis to vertical.^";
         continue;
       }
-      glk($0026, win, dir_understood+split_understood+border_understood, size_understood, win_understood); ! glk_window_set_arrangement
+      glk($0026, win, dir_understood+split_understood+border_understood, size_understood, keywin_understood); ! glk_window_set_arrangement
       print "Changed the parameters of the window split.^";
       announce_window_sizes();
 
@@ -382,21 +383,18 @@ Constant ALTWIN_ROCK 101;
     return true;
 ];
 
-[ iswindowref wx  wlen wpos ix val ch;
-    print window_prefix->0;
+[ iswindowref wx prefix  wlen wpos ix val ch;
     wlen = parse_buffer-->(wx*3+2);
-    if (window_prefix->0 > wlen)
+    if (prefix->0 > wlen)
         return false;
     wpos = parse_buffer-->(wx*3+3);
     val = 0;
-    for (ix=0 : ix< window_prefix->0 : ix++) {
+    for (ix=0 : ix< prefix->0 : ix++) {
         ch = input_buffer->(wpos+ix);
-        print ch, "^";
-        print window_prefix->(ix + 1), "^";
-        if (ch ~= window_prefix->(ix + 1))
+        if (ch ~= prefix->(ix + 1))
             return false;
     }
-    for (ix=window_prefix->0 : ix<wlen : ix++) {
+    for (ix=prefix->0 : ix<wlen : ix++) {
         ch = input_buffer->(wpos+ix);
         if (ch < '0' || ch > '9')
             return false;
@@ -446,14 +444,15 @@ Constant ALTWIN_ROCK 101;
   }
 ];
 
-[ parse_window_params  numwords wx wd win_set;
+[ parse_window_params default_win  numwords wx wd keywin_set;
   dir_understood = 2;
   split_understood = $10;
   type_understood = 4;
   size_understood = 1;
-  win_understood = mainwin;
+  keywin_understood = mainwin;
+  win_understood = default_win;
   border_understood = $0;
-  win_set = 0;
+  keywin_set = 0;
   
   numwords = parse_buffer-->0;
   for (wx=1 : wx<numwords : wx++) {
@@ -476,15 +475,19 @@ Constant ALTWIN_ROCK 101;
       'graphic', 'graphics': type_understood = 5;
       'pair': type_understood = 1;
 
-      'main': win_understood = mainwin; win_set = 1;
-      'alt', 'second', 'other': win_understood = altwin; win_set = 1;
+      'main': keywin_understood = mainwin; keywin_set = 1;
+      'alt', 'second', 'other': keywin_understood = altwin; keywin_set = 1;
 
       default:
         if (isnumber(wx))
           size_understood = num_understood;
-        else if (win_set == 0 && iswindowref(wx)) {
-          print "window found: ", winref_understood, "^";
+        else if (iswindowref(wx, window_prefix)) {
+          print "window found: ", win_understood, "^";
           win_understood = winref_understood;
+        }
+        else if (keywin_set == 0 && iswindowref(wx, keywindow_prefix)) {
+          print "key window found: ", win_understood, "^";
+          keywin_understood = winref_understood;
         }
           
     }
