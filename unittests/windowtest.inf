@@ -148,7 +148,7 @@ Constant ALTWIN_ROCK 101;
       parse_window_params(altwin);
       win = glk($0029, win_understood); ! window_get_parent
       if (~~win) {
-        print "Unable to locate parent of secondary window.^";
+        print "Unable to locate parent of window.^";
         continue;
       }
       glk($0027, win, gg_event+0, gg_event+4, gg_event+8); ! window_get_arrangement
@@ -183,7 +183,7 @@ Constant ALTWIN_ROCK 101;
         continue;
       }
       if (altwininput) {
-        print "The secondary window is already reading line input.^";
+        print "The last created window is already reading line input.^";
         continue;
       }
       glk($002F, altwin); ! glk_set_window
@@ -194,7 +194,7 @@ Constant ALTWIN_ROCK 101;
       glk($002F, mainwin); ! glk_set_window
       glk($00D0, altwin, inputalt_buffer, BUFLEN, 0); ! request_line_event
       altwininput = true;
-      print "Requested line input from secondary window.^";
+      print "Requested line input from last created window.^";
 
     'dropline':
       if (~~altwin) {
@@ -202,7 +202,7 @@ Constant ALTWIN_ROCK 101;
         continue;
       }
       if (~~altwininput) {
-        print "The secondary window is not reading line input.^";
+        print "The last created window is not reading line input.^";
         continue;
       }
       glk($00D1, altwin, gg_event); ! cancel_line_event
@@ -221,7 +221,7 @@ Constant ALTWIN_ROCK 101;
       glk($002F, altwin); ! glk_set_window
       print "(cancel)^";
       glk($002F, mainwin); ! glk_set_window
-      print "Cancelled line input from secondary window.^";
+      print "Cancelled line input from last created window.^";
       
     'echoline':
       if (~~altwin) {
@@ -239,9 +239,9 @@ Constant ALTWIN_ROCK 101;
         val = num_understood;
       glk($0150, altwin, val); ! glk_set_echo_line_event
       if (val)
-        print "Future line input events in secondary window will auto-echo.^";
+        print "Future line input events in last created window will auto-echo.^";
       else
-        print "Future line input events in secondary window will NOT auto-echo.^";
+        print "Future line input events in last created window will NOT auto-echo.^";
 
     'dialog':
       parse_file_params();
@@ -537,19 +537,19 @@ Constant ALTWIN_ROCK 101;
         or one of the following:^^";
     print "  ~windows~: List all open windows.^";
     print "  ~size~: Show the sizes of all open windows.^";
-    print "  ~open PARAMS~: Open a second window. PARAMS can include any of
+    print "  ~open PARAMS~: Open another window. PARAMS can include any of
         left/right/top/bottom, fixed/proportional, border/noborder,
         grid/buffer/blank/graphic,
         and a (numeric) size.^";
-    print "  ~close~: Close the second window.^";
-    print "  ~arrange PARAMS~: Change the second window arrangement. The
+    print "  ~close~: Close the last created window.^";
+    print "  ~arrange PARAMS~: Change the last created window's arrangement. The
         PARAMS are the same as above. (Note: not all parameters are legal,
         so you can cause a Glk error with this command.)^";
-    print "  ~getline~: Request line input in the second window.^";
-    print "  ~dropline~: Cancel line input in the second window.^";
-    print "  ~echoline NUM~: Begin/end line-input echoing in the second window.^";
+    print "  ~getline~: Request line input in the last created window.^";
+    print "  ~dropline~: Cancel line input in the last created window.^";
+    print "  ~echoline NUM~: Begin/end line-input echoing in the last created window.^";
     print "  ~echo~: Begin echoing all output from the first window to
-        the second window. (Causes a Glk error if mixed with ~getline~.)^";
+        the last created window. (Causes a Glk error if mixed with ~getline~.)^";
     print "  ~streams~: List all open streams.^";
     print "  ~styles~: Display a sample line of each text style.^";
     print "  ~dialog MODE~: Open a file-selection dialog.^";
@@ -758,7 +758,7 @@ Constant ALTWIN_ROCK 101;
 
 [ echo_window str curstr;
     if (~~altwin) {
-        print "You must open a second window before using the ~echo~ command.^";
+        print "You must open another window before using the ~echo~ command.^";
         return;
     }
 
@@ -771,7 +771,7 @@ Constant ALTWIN_ROCK 101;
     
     str = glk($002C, altwin); ! window_get_stream
     glk($002D, mainwin, str); ! window_set_echo_stream
-    print "Everything printed to the main window will be echoed to the second window.^";
+    print "Everything printed to the main window will be echoed to the last created window.^";
 ];
 
 [ show_streams str  rock val;
