@@ -117,7 +117,7 @@ Constant ALTWIN_ROCK 101;
     'close', 'unsplit':
       parse_window_params(altwin);
       if (~~altwin) {
-        print "No last created window, specify the window to close.^";
+        print "No last created window, specify a window.^";
         continue;
       }
       glk($00D1, win_understood, gg_event); ! cancel_line_event
@@ -141,11 +141,11 @@ Constant ALTWIN_ROCK 101;
         " characters and read in ", gg_event-->0, ".^";
 
     'setsize', 'resize', 'arrange', 'rearrange':
+      parse_window_params(altwin);
       if (~~altwin) {
-        print "The window is not split.^";
+        print "No last created window, specify a window.^";
         continue;
       }
-      parse_window_params(altwin);
       win = glk($0029, win_understood); ! window_get_parent
       if (~~win) {
         print "Unable to locate parent of window.^";
