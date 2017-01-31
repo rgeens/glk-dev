@@ -115,11 +115,11 @@ Constant ALTWIN_ROCK 101;
         glk($0102, altwin); ! request_hyperlink_event
 
     'close', 'unsplit':
+      parse_window_params(altwin);
       if (~~altwin) {
-        print "The window is not split.^";
+        print "No last created window, specify the window to close.^";
         continue;
       }
-      parse_window_params(altwin);
       glk($00D1, win_understood, gg_event); ! cancel_line_event
       if (gg_event-->0 == 3) {
         print "Window had line input pending";
@@ -482,11 +482,11 @@ Constant ALTWIN_ROCK 101;
         if (isnumber(wx))
           size_understood = num_understood;
         else if (iswindowref(wx, window_prefix)) {
-          print "window found: ", win_understood, "^";
+          print "window found: ", winref_understood, "^";
           win_understood = winref_understood;
         }
         else if (keywin_set == 0 && iswindowref(wx, keywindow_prefix)) {
-          print "key window found: ", win_understood, "^";
+          print "key window found: ", winref_understood, "^";
           keywin_understood = winref_understood;
         }
           
