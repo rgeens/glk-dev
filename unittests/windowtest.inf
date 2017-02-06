@@ -116,8 +116,8 @@ Constant ALTWIN_ROCK 101;
 
     'close', 'unsplit':
       parse_window_params(altwin);
-      if (~~altwin) {
-        print "No last created window, specify a window.^";
+      if (~~win_understood) {
+        print "Window not found.^";
         continue;
       }
       glk($00D1, win_understood, gg_event); ! cancel_line_event
