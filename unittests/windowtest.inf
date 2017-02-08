@@ -16,8 +16,8 @@ Array gg_tokenbuf -> DICT_WORD_SIZE;
 Constant MAX_BUFFER_WORDS = 20;
 Constant PARSE_BUFFER_LEN = 244;    ! 4 + MAX_BUFFER_WORDS*4;
 Array parse_buffer --> PARSE_BUFFER_LEN/WORDSIZE;
-Array window_prefix string "window_";
-Array keywindow_prefix string "keywindow_";
+Array window_prefix string "window=";
+Array keywindow_prefix string "keywindow=";
 
 Global num_understood;
 Global dir_understood;
@@ -117,7 +117,7 @@ Constant ALTWIN_ROCK 101;
     'close', 'unsplit':
       parse_window_params(altwin);
       if (~~win_understood) {
-        print "Window not found.^";
+        print "No last created window.^";
         continue;
       }
       glk($00D1, win_understood, gg_event); ! cancel_line_event
@@ -142,7 +142,7 @@ Constant ALTWIN_ROCK 101;
 
     'setsize', 'resize', 'arrange', 'rearrange':
       parse_window_params(altwin);
-      if (~~altwin) {
+      if (~~win_understood) {
         print "No last created window, specify a window.^";
         continue;
       }
@@ -537,14 +537,19 @@ Constant ALTWIN_ROCK 101;
         or one of the following:^^";
     print "  ~windows~: List all open windows.^";
     print "  ~size~: Show the sizes of all open windows.^";
-    print "  ~open PARAMS~: Open another window. PARAMS can include any of
+    print "  ~open PARAMS [window=NUM]~: Open another window. PARAMS can include any of
         left/right/top/bottom, fixed/proportional, border/noborder,
         grid/buffer/blank/graphic,
-        and a (numeric) size.^";
-    print "  ~close~: Close the last created window.^";
-    print "  ~arrange PARAMS~: Change the last created window's arrangement. The
-        PARAMS are the same as above. (Note: not all parameters are legal,
-        so you can cause a Glk error with this command.)^";
+        and a (numeric) size.
+        By default the split window is the main window. Use the optional window parameter
+	to specify a different one. NUM should be an opaque window reference. This is the
+	number shown by the windows command or when opening a new window.^";
+    print "  ~close [window=NUM]~: Closes the last created window. Use the optional window
+	parameter to specify a different one.^";
+    print "  ~arrange PARAMS [window=NUM] [keywindow=NUM]~: By default this will update the
+	main window, with the last created window as the key window. Use the optional window
+	and keywindow parameters to specify different ones. The PARAMS are the same as above.
+	(Note: not all parameters are legal, so you can cause a Glk error with this command.)^";
     print "  ~getline~: Request line input in the last created window.^";
     print "  ~dropline~: Cancel line input in the last created window.^";
     print "  ~echoline NUM~: Begin/end line-input echoing in the last created window.^";
