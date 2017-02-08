@@ -481,15 +481,10 @@ Constant ALTWIN_ROCK 101;
       default:
         if (isnumber(wx))
           size_understood = num_understood;
-        else if (iswindowref(wx, window_prefix)) {
-          print "window found: ", winref_understood, "^";
+        else if (iswindowref(wx, window_prefix))
           win_understood = winref_understood;
-        }
-        else if (keywin_set == 0 && iswindowref(wx, keywindow_prefix)) {
-          print "key window found: ", winref_understood, "^";
+        else if (keywin_set == 0 && iswindowref(wx, keywindow_prefix))
           keywin_understood = winref_understood;
-        }
-          
     }
   }
 ];
