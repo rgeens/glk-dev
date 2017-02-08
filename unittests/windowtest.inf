@@ -537,14 +537,14 @@ Constant ALTWIN_ROCK 101;
         grid/buffer/blank/graphic,
         and a (numeric) size.
         By default the split window is the main window. Use the optional window parameter
-	to specify a different one. NUM should be an opaque window reference. This is the
-	number shown by the windows command or when opening a new window.^";
+        to specify a different one. NUM should be an opaque window reference. This is the
+        number shown by the windows command or when opening a new window.^";
     print "  ~close [window=NUM]~: Closes the last created window. Use the optional window
-	parameter to specify a different one.^";
+        parameter to specify a different one.^";
     print "  ~arrange PARAMS [window=NUM] [keywindow=NUM]~: By default this will update the
-	main window, with the last created window as the key window. Use the optional window
-	and keywindow parameters to specify different ones. The PARAMS are the same as above.
-	(Note: not all parameters are legal, so you can cause a Glk error with this command.)^";
+        main window, with the last created window as the key window. Use the optional window
+        and keywindow parameters to specify different ones. The PARAMS are the same as above.
+        (Note: not all parameters are legal, so you can cause a Glk error with this command.)^";
     print "  ~getline~: Request line input in the last created window.^";
     print "  ~dropline~: Cancel line input in the last created window.^";
     print "  ~echoline NUM~: Begin/end line-input echoing in the last created window.^";
