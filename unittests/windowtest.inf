@@ -277,6 +277,15 @@ Constant ALTWIN_ROCK 101;
       glk($00C1, gg_event); ! select_poll
       print "Event poll: ", (printeventtype) gg_event-->0, "^";
 
+    'print':
+      parse_window_params(altwin);      
+      if (~~win_understood)
+        win_understood = mainwin;     
+      glk($002F, win_understood); ! glk_set_window
+      print "000^";
+      print "000^";
+      print "000^";
+
     default:
       print "I didn't understand that.^";
       
@@ -523,6 +532,8 @@ Constant ALTWIN_ROCK 101;
     print "  ~poll~: Poll for upcoming events. (There will normally not be
         any.)^";
     print "  ~link~: Display some clickable hyperlinks.^";
+    print "  ~print text=TEXT [window=NUM]~: Prints the specified text to the last created
+	window or the specified one.^";
 ];
 
 [ printeventtype evtype;
@@ -608,14 +619,22 @@ Constant ALTWIN_ROCK 101;
             print "(Cancelled input) ";
             
         if (wintype == 3) {
-            if (altisnew)
-                print "This is a new buffer window, size ";
+            if (altisnew) {
+                print "000^";
+                print "000^";
+                print "000^";
+                !print "This is a new buffer window, size ";
+            }
             else
                 print "Buffer window size now ";
         }
         else if (wintype == 4) {
-            if (altisnew)
-                print "This is a new grid window, size ";
+            if (altisnew) {
+                print "000^";
+                print "000^";
+                print "000^";
+                !print "This is a new grid window, size ";
+            }
             else
                 print "Grid window size now ";
         }
